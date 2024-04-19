@@ -104,6 +104,41 @@
         .container div {
             margin-right: 10px;
         }
+
+        @media only screen and (max-width: 1024px) {
+            legend {
+                text-align: left;
+            }
+
+            label {
+                width: 120px;
+            }
+
+            input,
+            select {
+                width: 180px;
+
+            }
+
+            #detailsContainer {
+                margin-top: 0px;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            #driverDetails,
+            #vehicleDetails,
+            #slotsDetails {
+                width: 100%;
+                /* Adjust the width as needed */
+                margin-top: 20px;
+                /* Add space between sections */
+            }
+
+            button {
+                margin-bottom: 20px;
+            }
+        }
     </style>
 </head>
 
@@ -403,8 +438,7 @@
                 .then(() => {
                     alert("Data Added Successfully");
                     // Redirect to CameraAccess.html
-                    window.location.href = "https://dakshithadissanayaka.github.io/CarParkingCamera/";
-
+                    window.location.href = "file:///Users/dk/Downloads/CarParking/CameraAccess.html";
                 })
                 .catch((error) => {
                     alert("Unsuccessful");
