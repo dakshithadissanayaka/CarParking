@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Security Car Parking System</title>
+    <style>
+        h1 {
+            text-align: center;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            text-align: center;
+        }
+
+        #detailsContainer {
+            display: flex;
+            justify-content: space-evenly;
+            width: auto;
+            margin-top: 50px;
+        }
+
+        #driverDetails {
+            width: 30%;
+        }
+
+        #vehicleDetails {
+            width: 30%;
+        }
+
+        #slotsDetails {
+            width: 30%;
+            display: grid;
+            grid-template-columns: repeat(0, 1fr);
+            grid-gap: 100px;
+        }
+
+        .slot {
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .not_available {
+            background-color: rgb(252, 80, 80);
+        }
+
+        .available {
+            background-color: rgb(105, 248, 105);
+        }
+
+
+
+        fieldset {
+            margin: 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        legend {
+            font-size: 18px;
+            font-weight: bold;
+            font-family: Arial, Helvetica, sans-serif;
+            margin-bottom: 10px;
+        }
+
+        label {
+            text-align: end;
+            display: inline-block;
+            font-size: 16px;
+            font-family: Arial, Helvetica, sans-serif;
+            width: 150px;
+        }
+
+        input,
+        select {
+            width: 220px;
+            height: 30px;
+            font-size: 16px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        button {
+            height: 35px;
+            width: 100px;
+            font-weight: bold;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        .container {
+            display: flex;
+            align-items: center;
+        }
+
+        .container div {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Smart Security Car Parking System</h1>
+
+    <div id="detailsContainer">
+        <div id="driverDetails">
+            <fieldset>
+                <legend>Driver Details:</legend>
+
+                <div class="container">
+                    <div>
+                        <label>Full Name</label>
+                    </div>
+                    <div>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                </div>
+
+                <br><br>
+
+                <div class="container">
+                    <div>
+                        <label>Email</label>
+                    </div>
+
+                    <div>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                </div>
+
+                <br><br>
+
+                <div class="container">
+                    <div>
+                        <label>Phone Number</label>
+                    </div>
+                    <div>
+                        <input type="tel" id="phoneNumber" name="phoneNumber" required>
+                    </div>
+                </div>
+
+                <br><br>
+
+                <div class="container">
+                    <div>
+                        <label>NIC</label>
+                    </div>
+                    <div>
+                        <input type="text" id="nic" name="nic" required>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+        <br><br>
+
+        <div id="vehicleDetails">
+            <fieldset>
+                <legend>Vehicle Details:</legend>
+
+                <div class="container">
+                    <div>
+                        <label>Vehicle Number</label>
+                    </div>
+                    <div>
+                        <input type="text" id="vehicleNumber" name="vehicleNumber" required>
+                    </div>
+                </div>
+
+                <br><br>
+
+                <div class="container">
+                    <div>
+                        <label>Vehicle Type</label>
+                    </div>
+                    <div>
+                        <select id="vehicleType" name="vehicleType" required>
+                            <option value="" disabled selected>-Select-</option>
+                            <option value="Car">Car</option>
+                            <option value="Van">Van</option>
+                            <option value="Bike">Bicycle</option>
+                        </select>
+                    </div>
+                </div>
+
+                <br><br>
+
+                <div class="container">
+                    <div>
+                        <label>Vehicle Brand</label>
+                    </div>
+                    <div>
+                        <select id="vehicleBrand" name="vehicleBrand" required>
+                            <option value="" disabled selected>-Select-</option>
+                        </select>
+                    </div>
+                </div>
+
+                <br><br>
+
+                <div class="container">
+                    <div>
+                        <label>Vehicle Modal</label>
+                    </div>
+                    <div>
+                        <select id="vehicleModal" name="vehicleModal" required>
+                            <option value="" disabled selected>-Select-</option>
+                        </select>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+
+
+        <div id="slotsDetails">
+            <fieldset>
+                <legend>Available Parking Slots:</legend>
+                <div class="slot" id="slot1">
+                    Slot 1
+                </div>
+                <div class="slot" id="slot2">
+                    Slot 2
+                </div>
+            </fieldset>
+        </div>
+    </div>
+
+
+
+    <br><br>
+
+    <button id="addBtn" type="button">Register</button>
+    <!-- <button id="retrieveBtn">Retrieve</button>
+    <button id="updateBtn">Update</button>
+    <button id="deleteBtn">Delete</button> -->
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCxXLk8jawS8wi4W0jble9Pk5eL8eu1BBI",
+            authDomain: "carparking-a1e90.firebaseapp.com",
+            databaseURL: "https://carparking-a1e90-default-rtdb.firebaseio.com",
+            projectId: "carparking-a1e90",
+            storageBucket: "carparking-a1e90.appspot.com",
+            messagingSenderId: "727645049731",
+            appId: "1:727645049731:web:49800f3c243049d6dc9cb6"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+
+        import { getDatabase, ref, child, get, set, update, remove } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+
+        const db = getDatabase();
+
+        let name = document.getElementById('name');
+        let email = document.getElementById('email');
+        let phoneNumber = document.getElementById('phoneNumber');
+        let nic = document.getElementById('nic');
+        let vehicleNumber = document.getElementById('vehicleNumber');
+        let vehicleType = document.getElementById('vehicleType');
+        let vehicleBrand = document.getElementById('vehicleBrand');
+        let vehicleModal = document.getElementById('vehicleModal');
+
+        let addBtn = document.getElementById('addBtn');
+        let retrieveBtn = document.getElementById('retrieveBtn');
+        let updateBtn = document.getElementById('updateBtn');
+        let deleteBtn = document.getElementById('deleteBtn');
+
+        // Get references to the slots
+        const slot1 = document.getElementById('slot1');
+        const slot2 = document.getElementById('slot2');
+
+        // Function to update slot colors based on database values
+        function updateSlotColors() {
+            const slotsRef = ref(db, 'SlotsDetails');
+            get(slotsRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const slots = snapshot.val();
+                    // Update Slot 1 color
+                    if (slots.slot1 === 1) {
+                        slot1.classList.remove('available');
+                        slot1.classList.add('not_available');
+                    } else {
+                        slot1.classList.remove('not_available');
+                        slot1.classList.add('available');
+                    }
+                    // Update Slot 2 color
+                    if (slots.slot2 === 1) {
+                        slot2.classList.remove('available');
+                        slot2.classList.add('not_available');
+                    } else {
+                        slot2.classList.remove('not_available');
+                        slot2.classList.add('available');
+                    }
+                } else {
+                    console.log("Slots data not found");
+                }
+            }).catch((error) => {
+                console.error("Error getting slots data: ", error);
+            });
+        }
+
+        // Call the function to initially update slot colors
+        updateSlotColors();
+
+        // Get references to the dropdowns
+        const vehicleTypeDropdown = document.getElementById('vehicleType');
+        const vehicleBrandDropdown = document.getElementById('vehicleBrand');
+        const vehicleModalDropdown = document.getElementById('vehicleModal');
+
+        // Data for vehicle types, brands, and models
+        const vehicleData = {
+            'Car': {
+                'Toyota': ['Corolla', 'Camry', 'Rav4'],
+                'Suzuki': ['Swift', 'Baleno', 'Vitara'],
+                'Honda': ['Civic', 'Accord', 'CR-V'],
+                'Ford': ['Fusion', 'Escape', 'Explorer'],
+                'Chevrolet': ['Malibu', 'Equinox', 'Tahoe'],
+            },
+            'Van': {
+                'Toyota': ['Sienna', 'Hiace', 'Alphard'],
+                'Suzuki': ['Every', 'Carry', 'Ertiga'],
+                'Nissan': ['NV200', 'Quest', 'Urvan'],
+                'Mercedes-Benz': ['Sprinter', 'Metris', 'V-Class'],
+                'Ford': ['Transit', 'Econoline', 'Tourneo'],
+            },
+            'Bike': {
+                'Bajaj': ['Pulsar', 'Platina', 'Dominar'],
+                'Suzuki': ['Gixxer', 'Hayabusa', 'Access'],
+                'Yamaha': ['FZ', 'R15', 'MT'],
+                'Honda': ['CBR', 'Activa', 'Hornet'],
+                'Kawasaki': ['Ninja', 'Versys', 'Z'],
+            }
+        };
+
+        // Function to populate vehicle brands based on the selected type
+        function populateVehicleBrands() {
+            const selectedType = vehicleTypeDropdown.value;
+            const brands = vehicleData[selectedType];
+            vehicleBrandDropdown.innerHTML = '<option value="" disabled selected>-Select-</option>';
+            for (const brand in brands) {
+                const option = document.createElement('option');
+                option.value = brand;
+                option.textContent = brand;
+                vehicleBrandDropdown.appendChild(option);
+            }
+            // Trigger the change event on Vehicle Brand dropdown to populate models
+            populateVehicleModels();
+        }
+
+        // Function to populate vehicle models based on the selected brand
+        function populateVehicleModels() {
+            const selectedType = vehicleTypeDropdown.value;
+            const selectedBrand = vehicleBrandDropdown.value;
+            if (selectedBrand) {
+                const models = vehicleData[selectedType][selectedBrand];
+                vehicleModalDropdown.innerHTML = '<option value="" disabled selected>-Select-</option>';
+                models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model;
+                    option.textContent = model;
+                    vehicleModalDropdown.appendChild(option);
+                });
+            } else {
+                vehicleModalDropdown.innerHTML = '<option value="" disabled selected>-Select Vehicle Brand First-</option>';
+            }
+        }
+
+        // Event listeners for dropdown changes
+        vehicleTypeDropdown.addEventListener('change', populateVehicleBrands);
+        vehicleBrandDropdown.addEventListener('change', populateVehicleModels);
+
+        function AddData() {
+            if (!name.value || !email.value || !phoneNumber.value || !nic.value || !vehicleNumber.value || !vehicleType.value || !vehicleBrand.value || !vehicleModal.value) {
+                alert("Please fill all the fields");
+                return;
+            }
+            set(ref(db, 'CarDetails/' + nic.value), {
+                name: name.value,
+                email: email.value,
+                phoneNumber: Number(phoneNumber.value),
+                nic: nic.value,
+                vehicleNumber: vehicleNumber.value,
+                vehicleType: vehicleType.value,
+                vehicleBrand: vehicleBrand.value,
+                vehicleModal: vehicleModal.value
+            })
+                .then(() => {
+                    alert("Data Added Successfully");
+                    // Redirect to CameraAccess.html
+                    window.location.href = "file:///Users/dk/Downloads/CarParking/CameraAccess.html";
+                })
+                .catch((error) => {
+                    alert("Unsuccessful");
+                    console.log(error);
+                });
+        }
+
+
+        function RetrieveData() {
+            const dbRef = ref(db);
+
+            get(child(dbRef, 'CarDetails/' + nic.value)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    name.value = snapshot.val().name;
+                    email.value = snapshot.val().email;
+                    phoneNumber.value = snapshot.val().phoneNumber;
+                    nic.value = snapshot.val().nic;
+                    vehicleNumber.value = snapshot.val().vehicleNumber;
+                    vehicleType.value = snapshot.val().vehicleType;
+                    vehicleBrand.value = snapshot.val().vehicleBrand;
+                    vehicleModal.value = snapshot.val().vehicleModal;
+                }
+                else {
+                    alert("Car Details does not exist");
+                }
+            })
+                .catch(() => {
+                    alert("Unsuccessful");
+                    console.log(error);
+                })
+        }
+
+        function UpdateData() {
+            update(ref(db, 'CarDetails/' + nic.value), {
+                name: name.value,
+                email: email.value,
+                phoneNumber: Number(phoneNumber.value),
+                nic: nic.value,
+                vehicleNumber: vehicleNumber.value,
+                vehicleType: vehicleType.value,
+                vehicleBrand: vehicleBrand.value,
+                vehicleModal: vehicleModal.value
+            })
+                .then(() => {
+                    alert("Data Updated Successfully");
+                })
+                .catch(() => {
+                    alert("Unsuccessful");
+                    console.log(error);
+                })
+        }
+
+        function DeleteData() {
+            remove(ref(db, 'CarDetails/' + nic.value))
+                .then(() => {
+                    alert("Data Deleted Successfully");
+                })
+                .catch(() => {
+                    alert("Unsuccessful");
+                    console.log(error);
+                })
+        }
+
+        addBtn.addEventListener('click', AddData);
+        retrieveBtn.addEventListener('click', RetrieveData);
+        updateBtn.addEventListener('click', UpdateData);
+        deleteBtn.addEventListener('click', DeleteData);
+    </script>
+
+</body>
+
+</html>

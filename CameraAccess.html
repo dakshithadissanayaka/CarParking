@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Security Car Parking System</title>
+    <style>
+        h1,
+        h2 {
+            text-align: center;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .live {
+            color: red;
+            margin-left: 20px;
+            animation: blink 1.5s infinite;
+            /* Adjust the animation duration */
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 0;
+                /* Invisible for 2 seconds */
+            }
+
+            33.33% {
+                opacity: 1;
+                /* Fully visible for 2 seconds */
+            }
+
+            66.66% {
+                opacity: 1;
+                /* Fully visible for 2 seconds */
+            }
+
+            100% {
+                opacity: 0;
+                /* Invisible for 2 seconds */
+            }
+        }
+
+        body {
+            text-align: center;
+        }
+
+        img {
+            border-radius: 5px;
+            border: 2px solid black;
+            width: 70%;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Smart Security Car Parking System</h1>
+
+    <h2>Your Car Slot Camera : <span class="live">LIVE</span></h1>
+
+        <div>
+            <img src="./cctv.jpg">
+        </div>
+</body>
+
+</html>
