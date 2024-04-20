@@ -145,6 +145,84 @@
             border-color: #007bff;
         }
 
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Stay in place */
+            z-index: 9999;
+            /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            overflow: auto;
+            /* Enable scroll if needed */
+            background-color: rgba(0, 0, 0, 0.4);
+            /* Black w/ opacity */
+        }
+
+        /* Modal content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            /* Could be more or less, depending on screen size */
+            border-radius: 10px;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            
+        }
+
+        /* Close button */
+        .close {
+            color: #aaa;
+            /* float: right; */
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .warning-message{
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        @media only screen and (max-width: 430px) {
+
+            /* Modal content */
+            .modal-content {
+                background-color: #fefefe;
+                margin: 80% auto;
+                /* 15% from the top and centered */
+                padding: 20px;
+                border: 1px solid #888;
+                width: 70%;
+                /* Could be more or less, depending on screen size */
+                border-radius: 10px;
+                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+                font-size: 18px;
+                font-weight: bold;
+            }
+
+        }
+
         @media only screen and (max-width: 1024px) {
             h1 {
                 margin-top: 40px;
@@ -194,6 +272,19 @@
     <h1>Smart Security Car Parking System</h1>
 
     <div id="detailsContainer">
+
+        <div id="slotsDetails">
+            <fieldset>
+                <legend>Available Parking Slots:</legend>
+                <div class="slot" id="slot1">
+                    Slot 1
+                </div>
+                <div class="slot" id="slot2">
+                    Slot 2
+                </div>
+            </fieldset>
+        </div>
+
         <div id="driverDetails">
             <fieldset>
                 <legend>Driver Details:</legend>
@@ -304,17 +395,7 @@
 
 
 
-        <div id="slotsDetails">
-            <fieldset>
-                <legend>Available Parking Slots:</legend>
-                <div class="slot" id="slot1">
-                    Slot 1
-                </div>
-                <div class="slot" id="slot2">
-                    Slot 2
-                </div>
-            </fieldset>
-        </div>
+
     </div>
 
 
@@ -325,6 +406,15 @@
     <!-- <button id="retrieveBtn">Retrieve</button>
     <button id="updateBtn">Update</button>
     <button id="deleteBtn">Delete</button> -->
+
+    <!-- Modal HTML structure -->
+    <div id="warningModal" class="modal">
+        <div class="modal-content">
+            <p>All parking slots are currently unavailable! <br><br> <span class="warning-message">Come Back Later</span></p>
+            <span class="close">&times;</span>
+        </div>
+    </div>
+
 
     <script type="module">
         // Import the functions you need from the SDKs you need
@@ -374,6 +464,9 @@
             get(slotsRef).then((snapshot) => {
                 if (snapshot.exists()) {
                     const slots = snapshot.val();
+                    if (slots.slot1 === 1 && slots.slot2 === 1) {
+                        modal.style.display = "block";
+                    }
                     // Update Slot 1 color
                     if (slots.slot1 === 1) {
                         slot1.classList.remove('available');
@@ -400,6 +493,25 @@
 
         // Call the function to initially update slot colors
         updateSlotColors();
+
+        // Get the modal
+        const modal = document.getElementById('warningModal');
+
+        // Get the <span> element that closes the modal
+        const span = document.getElementsByClassName("close")[0];
+
+
+        // Event listener for closing the modal
+        span.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
 
         // Get references to the dropdowns
         const vehicleTypeDropdown = document.getElementById('vehicleType');
