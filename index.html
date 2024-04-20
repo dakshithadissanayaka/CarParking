@@ -6,6 +6,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Security Car Parking System</title>
     <style>
+        .title {
+            text-align: center;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .live {
+            color: red;
+            margin-left: 20px;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 0;
+            }
+
+            33.33% {
+                opacity: 1;
+            }
+
+            66.66% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .image {
+            border-radius: 5px;
+            border: 2px solid black;
+            width: 70%;
+            height: auto;
+        }
+
+        @media only screen and (max-width: 430px) {
+            .image {
+                border-radius: 5px;
+                border: 2px solid black;
+                width: 100%;
+                height: auto;
+            }
+        }
+
         h1 {
             margin-top: 40px;
             text-align: center;
@@ -154,35 +199,24 @@
         }
 
 
-        /* Modal styles */
-        .modal {
+        .warningModal {
             display: none;
-            /* Hidden by default */
             position: fixed;
-            /* Stay in place */
             z-index: 9999;
-            /* Sit on top */
             left: 0;
             top: 0;
             width: 100%;
-            /* Full width */
             height: 100%;
-            /* Full height */
             overflow: auto;
-            /* Enable scroll if needed */
             background-color: rgba(0, 0, 0, 0.4);
-            /* Black w/ opacity */
         }
 
-        /* Modal content */
         .modal-content {
             background-color: #fff !important;
             margin: 15% auto;
-            /* 15% from the top and centered */
             padding: 20px;
             border: 1px solid #888;
             width: 50%;
-            /* Could be more or less, depending on screen size */
             border-radius: 10px;
             box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
             font-family: Arial, Helvetica, sans-serif;
@@ -191,10 +225,8 @@
 
         }
 
-        /* Close button */
         .close {
             color: #dc3545;
-            /* float: right; */
             font-size: 28px;
             font-weight: bold;
         }
@@ -214,15 +246,12 @@
 
         @media only screen and (max-width: 430px) {
 
-            /* Modal content */
             .modal-content {
                 background-color: #fefefe;
                 margin: 80% auto;
-                /* 15% from the top and centered */
                 padding: 20px;
                 border: 1px solid #888;
                 width: 70%;
-                /* Could be more or less, depending on screen size */
                 border-radius: 10px;
                 box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
                 font-size: 18px;
@@ -256,9 +285,7 @@
             #vehicleDetails,
             #slotsDetails {
                 width: 100%;
-                /* Adjust the width as needed */
                 margin-top: 20px;
-                /* Add space between sections */
             }
 
             button {
@@ -267,154 +294,177 @@
 
 
         }
+
+        #CameraContainer {
+            display: none;
+        }
+
+        .showCameraContainer {
+            display: block !important;
+        }
+
+        .hideRegistationContainer {
+            display: none !important;
+        }
     </style>
 </head>
 
 <body>
     <h1>Smart Security Car Parking System</h1>
 
-    <div id="detailsContainer">
+    <div id="CameraContainer">
+        <h2 class="title">Your Car Slot Camera : <span class="live">LIVE</span></h1>
 
-        <div id="slotsDetails">
-            <fieldset>
-                <legend>Available Parking Slots:</legend>
-                <div class="slot" id="slot1">
-                    Slot 1
-                </div>
-                <div class="slot" id="slot2">
-                    Slot 2
-                </div>
-            </fieldset>
-        </div>
-
-        <div id="driverDetails">
-            <fieldset>
-                <legend>Driver Details:</legend>
-
-                <div class="container">
-                    <div>
-                        <label>Full Name</label>
-                    </div>
-                    <div>
-                        <input type="text" id="name" name="name" required>
-                    </div>
-                </div>
-
-                <br><br>
-
-                <div class="container">
-                    <div>
-                        <label>Email</label>
-                    </div>
-
-                    <div>
-                        <input type="email" id="email" name="email" required>
-                    </div>
-                </div>
-
-                <br><br>
-
-                <div class="container">
-                    <div>
-                        <label>Phone Number</label>
-                    </div>
-                    <div>
-                        <input type="tel" id="phoneNumber" name="phoneNumber" required>
-                    </div>
-                </div>
-
-                <br><br>
-
-                <div class="container">
-                    <div>
-                        <label>NIC</label>
-                    </div>
-                    <div>
-                        <input type="text" id="nic" name="nic" required>
-                    </div>
-                </div>
-            </fieldset>
-        </div>
-
-
-
-        <div id="vehicleDetails">
-            <fieldset>
-                <legend>Vehicle Details:</legend>
-
-                <div class="container">
-                    <div>
-                        <label>Vehicle Number</label>
-                    </div>
-                    <div>
-                        <input type="text" id="vehicleNumber" name="vehicleNumber" required>
-                    </div>
-                </div>
-
-                <br><br>
-
-                <div class="container">
-                    <div>
-                        <label>Vehicle Type</label>
-                    </div>
-                    <div>
-                        <select id="vehicleType" name="vehicleType" required>
-                            <option value="" disabled selected>-Select-</option>
-                            <option value="Car">Car</option>
-                            <option value="Van">Van</option>
-                            <option value="Bike">Bicycle</option>
-                        </select>
-                    </div>
-                </div>
-
-                <br><br>
-
-                <div class="container">
-                    <div>
-                        <label>Vehicle Brand</label>
-                    </div>
-                    <div>
-                        <select id="vehicleBrand" name="vehicleBrand" required>
-                            <option value="" disabled selected>-Select-</option>
-                        </select>
-                    </div>
-                </div>
-
-                <br><br>
-
-                <div class="container">
-                    <div>
-                        <label>Vehicle Modal</label>
-                    </div>
-                    <div>
-                        <select id="vehicleModal" name="vehicleModal" required>
-                            <option value="" disabled selected>-Select-</option>
-                        </select>
-                    </div>
-                </div>
-            </fieldset>
-        </div>
-
-
-
+            <div>
+                <img class="image" src="./cctv.jpg">
+            </div>
 
     </div>
 
+    <div id="RegistationContainer">
+
+        <div id="detailsContainer">
+
+            <div id="slotsDetails">
+                <fieldset>
+                    <legend>Available Parking Slots:</legend>
+                    <div class="slot" id="slot1">
+                        Slot 1
+                    </div>
+                    <div class="slot" id="slot2">
+                        Slot 2
+                    </div>
+                </fieldset>
+            </div>
+
+            <div id="driverDetails">
+                <fieldset>
+                    <legend>Driver Details:</legend>
+
+                    <div class="container">
+                        <div>
+                            <label>Full Name</label>
+                        </div>
+                        <div>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                    </div>
+
+                    <br><br>
+
+                    <div class="container">
+                        <div>
+                            <label>Email</label>
+                        </div>
+
+                        <div>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                    </div>
+
+                    <br><br>
+
+                    <div class="container">
+                        <div>
+                            <label>Phone Number</label>
+                        </div>
+                        <div>
+                            <input type="tel" id="phoneNumber" name="phoneNumber" required>
+                        </div>
+                    </div>
+
+                    <br><br>
+
+                    <div class="container">
+                        <div>
+                            <label>NIC</label>
+                        </div>
+                        <div>
+                            <input type="text" id="nic" name="nic" required>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
 
 
-    <br><br>
 
-    <button id="addBtn" type="button" class="btn btn-primary">Register</button>
-    <!-- <button id="retrieveBtn">Retrieve</button>
+            <div id="vehicleDetails">
+                <fieldset>
+                    <legend>Vehicle Details:</legend>
+
+                    <div class="container">
+                        <div>
+                            <label>Vehicle Number</label>
+                        </div>
+                        <div>
+                            <input type="text" id="vehicleNumber" name="vehicleNumber" required>
+                        </div>
+                    </div>
+
+                    <br><br>
+
+                    <div class="container">
+                        <div>
+                            <label>Vehicle Type</label>
+                        </div>
+                        <div>
+                            <select id="vehicleType" name="vehicleType" required>
+                                <option value="" disabled selected>-Select-</option>
+                                <option value="Car">Car</option>
+                                <option value="Van">Van</option>
+                                <option value="Bike">Bicycle</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <br><br>
+
+                    <div class="container">
+                        <div>
+                            <label>Vehicle Brand</label>
+                        </div>
+                        <div>
+                            <select id="vehicleBrand" name="vehicleBrand" required>
+                                <option value="" disabled selected>-Select-</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <br><br>
+
+                    <div class="container">
+                        <div>
+                            <label>Vehicle Modal</label>
+                        </div>
+                        <div>
+                            <select id="vehicleModal" name="vehicleModal" required>
+                                <option value="" disabled selected>-Select-</option>
+                            </select>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+
+
+
+
+        </div>
+
+
+
+        <br><br>
+
+        <button id="addBtn" type="button" class="btn btn-primary">Register</button>
+        <!-- <button id="retrieveBtn">Retrieve</button>
     <button id="updateBtn">Update</button>
     <button id="deleteBtn">Delete</button> -->
 
-    <!-- Modal HTML structure -->
-    <div id="warningModal" class="modal">
+    </div>
+
+    <div id="warningModal" class="warningModal">
         <div class="modal-content">
             <p>All parking slots are currently unavailable! <br><br> <span class="warning-message">Come Back
                     Later</span></p>
-            <!-- <span class="close">&times;</span> -->
         </div>
     </div>
 
@@ -458,6 +508,10 @@
         let deleteBtn = document.getElementById('deleteBtn');
 
         // Get references to the slots
+        const CameraContainer = document.getElementById('CameraContainer');
+        const RegistationContainer = document.getElementById('RegistationContainer');
+
+        // Get references to the slots
         const slot1 = document.getElementById('slot1');
         const slot2 = document.getElementById('slot2');
 
@@ -468,7 +522,7 @@
                 if (snapshot.exists()) {
                     const slots = snapshot.val();
                     if (slots.slot1 === 1 && slots.slot2 === 1) {
-                        modal.style.display = "block";
+                        warningModal.style.display = "block";
                     }
                     // Update Slot 1 color
                     if (slots.slot1 === 1) {
@@ -498,16 +552,16 @@
         updateSlotColors();
 
         // Get the modal
-        const modal = document.getElementById('warningModal');
+        const warningModal = document.getElementById('warningModal');
 
         // Get the <span> element that closes the modal
         // const span = document.getElementsByClassName("close")[0];
 
 
         // Event listener for closing the modal
-        span.onclick = function () {
-            modal.style.display = "none";
-        }
+        // span.onclick = function () {
+        //     warningModal.style.display = "none";
+        // }
 
         // When the user clicks anywhere outside of the modal, close it
         // window.onclick = function (event) {
@@ -594,7 +648,7 @@
                 if (snapshot.exists()) {
                     const slots = snapshot.val();
                     if (slots.slot1 === 0 || slots.slot2 === 0) {
-                        set(ref(db, 'registration_status/'),1)
+                        set(ref(db, 'registration_status/'), 1)
                     }
                 }
             })
@@ -611,8 +665,10 @@
             })
                 .then(() => {
                     alert("Data Added Successfully");
-                    // Redirect to CameraAccess.html
-                    window.location.href = "https://dakshithadissanayaka.github.io/CarParkingCamera/";
+
+                    RegistationContainer.classList.add('hideRegistationContainer');
+                    CameraContainer.classList.add('showCameraContainer');
+
                 })
                 .catch((error) => {
                     alert("Unsuccessful");
