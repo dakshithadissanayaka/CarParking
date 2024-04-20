@@ -414,7 +414,7 @@
         <div class="modal-content">
             <p>All parking slots are currently unavailable! <br><br> <span class="warning-message">Come Back
                     Later</span></p>
-            <span class="close">&times;</span>
+            <!-- <span class="close">&times;</span> -->
         </div>
     </div>
 
@@ -501,7 +501,7 @@
         const modal = document.getElementById('warningModal');
 
         // Get the <span> element that closes the modal
-        const span = document.getElementsByClassName("close")[0];
+        // const span = document.getElementsByClassName("close")[0];
 
 
         // Event listener for closing the modal
@@ -510,11 +510,11 @@
         }
 
         // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function (event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
+        // window.onclick = function (event) {
+        //     if (event.target == modal) {
+        //         modal.style.display = "none";
+        //     }
+        // }
 
         // Get references to the dropdowns
         const vehicleTypeDropdown = document.getElementById('vehicleType');
