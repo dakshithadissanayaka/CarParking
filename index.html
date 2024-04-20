@@ -11,6 +11,17 @@
             font-family: Arial, Helvetica, sans-serif;
         }
 
+        .welcome {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .arrivalTime,
+        .totalTime,
+        .totalPaymentForTime {
+            text-align: left;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
         .live {
             color: red;
             margin-left: 20px;
@@ -36,6 +47,7 @@
         }
 
         .image {
+            margin-top: 20px;
             border-radius: 5px;
             border: 2px solid black;
             width: 70%;
@@ -43,6 +55,16 @@
         }
 
         @media only screen and (max-width: 430px) {
+
+            .arrivalTime,
+            .totalTime,
+            .totalPaymentForTime {
+                font-size: 14px;
+                text-align: left;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+
+
             .image {
                 border-radius: 5px;
                 border: 2px solid black;
@@ -295,7 +317,15 @@
 
         }
 
+        .paymentDetails {
+            margin-left: 20%;
+        }
+
         #CameraContainer {
+            display: none;
+        }
+
+        #RegistationContainer {
             display: none;
         }
 
@@ -306,23 +336,34 @@
         .hideRegistationContainer {
             display: none !important;
         }
+
+        .login,
+        .registration {
+            font-family: Arial, Helvetica, sans-serif;
+        }
     </style>
 </head>
 
 <body>
     <h1>Smart Security Car Parking System</h1>
 
-    <div id="CameraContainer">
-        <h2 class="title">Your Car Slot Camera : <span class="live">LIVE</span></h1>
+    <!-- Add the user login section -->
+    <div id="userLoginSection" style="display: none;">
+        <p class="welcome">Welcome, <span id="userFullName"></span> | <a href="#" id="logoutLink">Logout</a></p>
+    </div>
 
-            <div>
-                <img class="image" src="./cctv.jpg">
-            </div>
 
+    <div id="loginContainer">
+        <h2 class="login">Login</h2>
+        <input type="text" id="loginEmail" placeholder="Email" required><br><br>
+        <input type="password" id="loginPassword" placeholder="Password" required><br><br>
+        <button id="loginBtn" type="button" class="btn btn-primary">Login</button>
+        <p>Are you new? <span id="signUpLink" style="text-decoration: underline; cursor: pointer;">Create an
+                account</span></p>
     </div>
 
     <div id="RegistationContainer">
-
+        <h2 class="registration">Registration</h2>
         <div id="detailsContainer">
 
             <div id="slotsDetails">
@@ -354,18 +395,6 @@
 
                     <div class="container">
                         <div>
-                            <label>Email</label>
-                        </div>
-
-                        <div>
-                            <input type="email" id="email" name="email" required>
-                        </div>
-                    </div>
-
-                    <br><br>
-
-                    <div class="container">
-                        <div>
                             <label>Phone Number</label>
                         </div>
                         <div>
@@ -381,6 +410,29 @@
                         </div>
                         <div>
                             <input type="text" id="nic" name="nic" required>
+                        </div>
+                    </div>
+
+                    <br><br>
+
+                    <div class="container">
+                        <div>
+                            <label>Email</label>
+                        </div>
+
+                        <div>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                    </div>
+
+                    <br><br>
+
+                    <div class="container">
+                        <div>
+                            <label>Password</label>
+                        </div>
+                        <div>
+                            <input type="password" id="password" name="password" required>
                         </div>
                     </div>
                 </fieldset>
@@ -455,9 +507,30 @@
         <br><br>
 
         <button id="addBtn" type="button" class="btn btn-primary">Register</button>
+        <p>Do you have an account? <span id="signinLink"
+                style="text-decoration: underline; cursor: pointer;">Login</span></p>
+
         <!-- <button id="retrieveBtn">Retrieve</button>
     <button id="updateBtn">Update</button>
     <button id="deleteBtn">Delete</button> -->
+
+    </div>
+
+
+    <div id="CameraContainer">
+        <h2 class="title">Your Car Slot Camera : <span class="live">LIVE</span></h2>
+
+        <div class="paymentDetails">
+            <h2 class="arrivalTime"> Arrival Time : <span class="live"> </span></h2>
+            <h2 class="totalTime"> Total Time : <span class="live"> </span></h2>
+            <h2 class="totalPaymentForTime"> Total Payment for Time : <span class="live"> </span></h2>
+        </div>
+
+        <button id="payForDispatch" type="button" class="btn btn-primary">Pay For Dispatch</button>
+
+        <div>
+            <img class="image" src="./cctv.jpg">
+        </div>
 
     </div>
 
@@ -470,10 +543,47 @@
 
 
     <script type="module">
+
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get references to the login and registration containers
+            const loginContainer = document.getElementById('loginContainer');
+            const registrationContainer = document.getElementById('RegistationContainer');
+
+            // Function to toggle between login and registration containers
+            function toggleContainersSignUp() {
+                loginContainer.style.display = 'none';
+                registrationContainer.style.display = 'block';
+            }
+
+            // Event listener for "Sign Up" link or button click
+            const signUpLink = document.getElementById('signUpLink');
+            signUpLink.addEventListener('click', toggleContainersSignUp);
+
+            // Function to toggle between login and registration containers
+            function toggleContainersSignin() {
+                loginContainer.style.display = 'block';
+                registrationContainer.style.display = 'none';
+            }
+
+            // Event listener for "Sign Up" link or button click
+            const signinLink = document.getElementById('signinLink');
+            signinLink.addEventListener('click', toggleContainersSignin);
+        });
+
+        // Get references to the slots
+        const CameraContainer = document.getElementById('CameraContainer');
+        const loginContainer = document.getElementById('loginContainer');
+        const registrationContainer = document.getElementById('RegistationContainer');
+
+
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
         // TODO: Add SDKs for Firebase products that you want to use
         // https://firebase.google.com/docs/web/setup#available-libraries
+
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -489,14 +599,135 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
 
+        // Initialize Firebase Authentication and get a reference to the service
+        const auth = getAuth(app);
+
+        // Inside the loginUser function after successful login
+        function loginUser(email, password) {
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // Signed in 
+                    const user = userCredential.user;
+                    // You can do additional tasks here after successful login
+                    // For example, redirect the user to another page or show a success message
+                    console.log("User logged in:", user);
+                    sessionStorage.setItem('user', JSON.stringify(user));
+                    // Show the user login section
+                    document.getElementById('userFullName').textContent = user.email; // Update to display email
+                    document.getElementById('userLoginSection').style.display = 'block';
+                    // Hide the login container and show the camera container
+                    loginContainer.style.display = 'none';
+                    CameraContainer.style.display = 'block';
+                    // Display a success toast message
+                    alert("Login successful!");
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    // Handle errors here
+                    console.error("Login error:", errorMessage);
+                    // You can display an error toast message here if you want
+                    alert("Login failed. Please check your credentials and try again.");
+                });
+        }
+
+        // Inside the registerUser function after successful registration
+        function registerUser(email, password) {
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // Signed up 
+                    const user = userCredential.user;
+                    // You can do additional tasks here after successful registration
+                    // For example, redirect the user to another page or show a success message
+                    console.log("User registered:", user);
+                    sessionStorage.setItem('user', JSON.stringify(user));
+                    // Show the user login section
+                    document.getElementById('userFullName').textContent = user.displayName;
+                    document.getElementById('userLoginSection').style.display = 'block';
+                    // Hide the registration container and show the camera container
+                    registrationContainer.style.display = 'none';
+                    CameraContainer.style.display = 'block';
+                    // Display a success toast message
+                    alert("Registration successful!");
+                    AddData();
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    // Handle errors here
+                    console.error("Registration error:", errorMessage);
+                    // You can display an error toast message here if you want
+                    alert("Registration failed. Please try again.");
+                });
+        }
+
+        // Check if user data exists in sessionStorage on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            const userData = sessionStorage.getItem('user');
+            if (userData) {
+                // User data exists, parse it and log in the user
+                const user = JSON.parse(userData);
+                // Continue with login process
+                // For example, update UI to show user as logged in
+                console.log("User data found in sessionStorage:", user);
+                // Show the user login section
+                document.getElementById('userFullName').textContent = user.email; // Update to display email
+                document.getElementById('userLoginSection').style.display = 'block';
+                // Hide the login container and show the camera container
+                loginContainer.style.display = 'none';
+                CameraContainer.style.display = 'block';
+            }
+        });
+
+        // Logout function
+        document.getElementById('logoutLink').addEventListener('click', () => {
+            auth.signOut().then(() => {
+                // Sign-out successful.
+                // Hide the user login section
+                document.getElementById('userLoginSection').style.display = 'none';
+                document.getElementById('CameraContainer').style.display = 'none';
+                // Show the login container
+                loginContainer.style.display = 'block';
+                // Display a success toast message
+                alert("Logout successful!");
+            }).catch((error) => {
+                // An error happened.
+                console.error("Logout error:", error.message);
+                // You can display an error toast message here if you want
+                alert("Logout failed. Please try again.");
+            });
+        });
+
+
+
+        // Register button click event
+        const registerBtn = document.getElementById('addBtn');
+        registerBtn.addEventListener('click', () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            registerUser(email, password);
+        });
+
+        // Login button click event
+        const loginBtn = document.getElementById('loginBtn');
+        loginBtn.addEventListener('click', () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            loginUser(email, password);
+        });
+
+
+
         import { getDatabase, ref, child, get, set, update, remove } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
 
         const db = getDatabase();
+
 
         let name = document.getElementById('name');
         let email = document.getElementById('email');
         let phoneNumber = document.getElementById('phoneNumber');
         let nic = document.getElementById('nic');
+        let password = document.getElementById('password')
         let vehicleNumber = document.getElementById('vehicleNumber');
         let vehicleType = document.getElementById('vehicleType');
         let vehicleBrand = document.getElementById('vehicleBrand');
@@ -506,10 +737,6 @@
         let retrieveBtn = document.getElementById('retrieveBtn');
         let updateBtn = document.getElementById('updateBtn');
         let deleteBtn = document.getElementById('deleteBtn');
-
-        // Get references to the slots
-        const CameraContainer = document.getElementById('CameraContainer');
-        const RegistationContainer = document.getElementById('RegistationContainer');
 
         // Get references to the slots
         const slot1 = document.getElementById('slot1');
@@ -638,7 +865,7 @@
         vehicleBrandDropdown.addEventListener('change', populateVehicleModels);
 
         function AddData() {
-            if (!name.value || !email.value || !phoneNumber.value || !nic.value || !vehicleNumber.value || !vehicleType.value || !vehicleBrand.value || !vehicleModal.value) {
+            if (!name.value || !email.value || !phoneNumber.value || !nic.value || !vehicleNumber.value || !vehicleType.value || !vehicleBrand.value || !vehicleModal.value || !password.value) {
                 alert("Please fill all the fields");
                 return;
             }
@@ -653,22 +880,30 @@
                 }
             })
 
+            // Create a new Date object
+            const now = new Date();
+
+            // Get the current hour, minute, and second
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+
+            // Format the time as HH:MM:SS
+            const formattedTime = `${hours}:${minutes}`;
+
             set(ref(db, 'CarDetails/' + nic.value), {
                 name: name.value,
                 email: email.value,
                 phoneNumber: Number(phoneNumber.value),
                 nic: nic.value,
+                password: password.value,
                 vehicleNumber: vehicleNumber.value,
                 vehicleType: vehicleType.value,
                 vehicleBrand: vehicleBrand.value,
-                vehicleModal: vehicleModal.value
+                vehicleModal: vehicleModal.value,
+                arrivalTime: formattedTime
             })
                 .then(() => {
-                    alert("Data Added Successfully");
-
-                    RegistationContainer.classList.add('hideRegistationContainer');
-                    CameraContainer.classList.add('showCameraContainer');
-
+                    console.log("Data Added Successfully");
                 })
                 .catch((error) => {
                     alert("Unsuccessful");
@@ -686,6 +921,7 @@
                     email.value = snapshot.val().email;
                     phoneNumber.value = snapshot.val().phoneNumber;
                     nic.value = snapshot.val().nic;
+                    password = snapshot.val().password;
                     vehicleNumber.value = snapshot.val().vehicleNumber;
                     vehicleType.value = snapshot.val().vehicleType;
                     vehicleBrand.value = snapshot.val().vehicleBrand;
@@ -707,6 +943,7 @@
                 email: email.value,
                 phoneNumber: Number(phoneNumber.value),
                 nic: nic.value,
+                password: password.value,
                 vehicleNumber: vehicleNumber.value,
                 vehicleType: vehicleType.value,
                 vehicleBrand: vehicleBrand.value,
@@ -732,7 +969,7 @@
                 })
         }
 
-        addBtn.addEventListener('click', AddData);
+        // addBtn.addEventListener('click', AddData);
         retrieveBtn.addEventListener('click', RetrieveData);
         updateBtn.addEventListener('click', UpdateData);
         deleteBtn.addEventListener('click', DeleteData);
