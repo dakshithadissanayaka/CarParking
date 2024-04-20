@@ -84,7 +84,7 @@
             width: 150px;
         }
 
-        input{
+        input {
             width: 180px;
             height: 30px;
             font-size: 16px;
@@ -188,7 +188,7 @@
             font-family: Arial, Helvetica, sans-serif;
             font-size: 16px;
             font-weight: bold;
-            
+
         }
 
         /* Close button */
@@ -199,7 +199,7 @@
             font-weight: bold;
         }
 
-        .warning-message{
+        .warning-message {
             font-family: Arial, Helvetica, sans-serif;
             font-size: 24px;
             font-weight: bold;
@@ -412,7 +412,8 @@
     <!-- Modal HTML structure -->
     <div id="warningModal" class="modal">
         <div class="modal-content">
-            <p>All parking slots are currently unavailable! <br><br> <span class="warning-message">Come Back Later</span></p>
+            <p>All parking slots are currently unavailable! <br><br> <span class="warning-message">Come Back
+                    Later</span></p>
             <span class="close">&times;</span>
         </div>
     </div>
@@ -587,6 +588,17 @@
                 alert("Please fill all the fields");
                 return;
             }
+
+            const slotsRef = ref(db, 'SlotsDetails');
+            get(slotsRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const slots = snapshot.val();
+                    if (slots.slot1 === 0 || slots.slot2 === 0) {
+                        set(ref(db, 'registration_status/'),1)
+                    }
+                }
+            })
+
             set(ref(db, 'CarDetails/' + nic.value), {
                 name: name.value,
                 email: email.value,
