@@ -365,18 +365,6 @@
         <h2 class="registration">Registration</h2>
         <div id="detailsContainer">
 
-            <div id="slotsDetails">
-                <fieldset>
-                    <legend>Available Parking Slots:</legend>
-                    <div class="slot" id="slot1">
-                        Slot 1
-                    </div>
-                    <div class="slot" id="slot2">
-                        Slot 2
-                    </div>
-                </fieldset>
-            </div>
-
             <div id="driverDetails">
                 <fieldset>
                     <legend>Driver Details:</legend>
@@ -516,7 +504,11 @@
     </div>
 
 
-    <!-- <div id="DashboardContainer" style="display: none;">
+    <div id="DashboardContainer" style="display: none;">
+        <!-- Add the user login section -->
+        <div id="userLoginSection" style="display: none;">
+            <p class="welcome">Welcome, <span id="userFullName"></span> | <a href="#" id="logoutLink">Logout</a></p>
+        </div>
         <h2 class="title">Dashboard</h2>
 
         <div id="slotsDetails">
@@ -531,11 +523,16 @@
             </fieldset>
         </div>
 
-        <button id="buySlot" type="button" class="btn btn-primary">Buy a Slot</button>
-    </div> -->
+        <button id="buySlot" type="button" class="btn btn-primary" style="margin-top: 20px;">Check my Slot</button>
+        <button id="wantToBuySlot" type="button" class="btn btn-primary" style="margin-top: 20px;">Buy a Slot</button>
+    </div>
 
 
     <div id="CameraContainer">
+        <!-- Add the user login section -->
+        <div id="userLoginSection" style="display: none;">
+            <p class="welcome">Welcome, <span id="userFullName"></span> | <a href="#" id="logoutLink">Logout</a></p>
+        </div>
         <h2 class="title">Your Car Slot Camera : <span class="live">LIVE</span></h2>
 
         <div class="paymentDetails">
@@ -556,6 +553,10 @@
 
     <!-- Add the payment section -->
     <div id="thankYouPaymentContainer" style="display: none;">
+        <!-- Add the user login section -->
+        <div id="userLoginSection" style="display: none;">
+            <p class="welcome">Welcome, <span id="userFullName"></span> | <a href="#" id="logoutLink">Logout</a></p>
+        </div>
         <h1 class="welcome" style="margin-top: 100px;">Thank you.<br> Payment was successfully!<br><br>See You Again.
         </h1>
     </div>
@@ -583,6 +584,8 @@
             const currentTime = `${formattedHours}:${formattedMinutes} ${amOrPm}`;
             return currentTime;
         }
+
+
 
         document.addEventListener('DOMContentLoaded', function () {
 
@@ -626,7 +629,6 @@
                 return totalPayment;
             }
 
-
             // Function to update the content of the time span
             function updateTimeSpan() {
                 const arrivalTimeSpan = document.querySelector('.arrivalTimeOut');
@@ -638,54 +640,59 @@
                 const userData = JSON.parse(sessionStorage.getItem('user'));
 
                 if (arrivalTimeSpan && nowTimeSpan && totalTimeSpan && totalPaymentSpan) {
+                    // Reference to the user's CurrentParkingData node in the database
+                    const userParkingDataRef = ref(db, `users/${userData.uid}/CurrentParkingData`);
 
-                    // Retrieve the logged-in user's data from the database
-                    const dbRef = ref(db);
-                    const userRef = child(dbRef, 'users/' + userData.uid);
-
-                    get(userRef).then((snapshot) => {
+                    // Get the snapshot of CurrentParkingData
+                    get(userParkingDataRef).then((snapshot) => {
                         if (snapshot.exists()) {
-                            const user = snapshot.val();
-                            if (user.paid === 1) {
-                                // Stop the function execution if paid is 1
-                                return;
-                            }
-                            nowTimeSpan.textContent = updateCurrentTime();
-                            const totalTime = calculateTotalTime(arrivalTime, updateCurrentTime());
-                            totalTimeSpan.textContent = totalTime;
+                            // Iterate over the child nodes under CurrentParkingData
+                            snapshot.forEach((dateSnapshot) => {
+                                dateSnapshot.forEach((timeSnapshot) => {
+                                    const timeData = timeSnapshot.val();
 
-                            const totalPayment = calculateTotalPayment(totalTime);
-                            // Update the payment span with the calculated value
-                            totalPaymentSpan.textContent = totalPayment + ' LKR';
+                                    const paid = timeData.paid;
 
-                            // Check if totalTime and totalPayment are valid numbers
-                            if (totalTime && totalPayment) {
-                                // Update the Firebase database with the new values
-                                const user = JSON.parse(sessionStorage.getItem('user'));
-                                const userRef = ref(db, 'users/' + user.uid);
-                                // Convert totalTime and totalPayment to strings
-                                const totalTimeStr = totalTime.toString();
-                                const totalPaymentStr = totalPayment.toString();
-                                // Update the Firebase database with the new values
-                                update(userRef, {
-                                    totalTime: totalTimeStr,
-                                    totalPayment: totalPaymentStr
-                                }).then(() => {
-                                    console.log("Data updated successfully in the Firebase database.");
-                                }).catch((error) => {
-                                    console.error("Error updating data in the Firebase database:", error);
+                                    // Stop the function execution if paid is 1
+                                    if (paid === 1) {
+                                        return;
+                                    }
+                                    const arrivalTime = timeData.arrivalTime;
+
+                                    nowTimeSpan.textContent = updateCurrentTime();
+
+
+                                    // Calculate total time and total payment
+                                    const totalTime = calculateTotalTime(arrivalTime, updateCurrentTime());
+                                    totalTimeSpan.textContent = totalTime;
+
+                                    const totalPayment = calculateTotalPayment(totalTime);
+                                    totalPaymentSpan.textContent = totalPayment + ' LKR';
+
+
+                                    // Update totalTime and totalPayment in the database
+                                    update(timeSnapshot.ref, {
+                                        totalTime: totalTime.toString(),
+                                        totalPayment: totalPayment.toString()
+                                    }).then(() => {
+                                        console.log("Total time and total payment updated successfully.");
+                                    }).catch((error) => {
+                                        console.error("Error updating total time and total payment:", error);
+                                    });
                                 });
-                            } else {
-                                console.error("Total time or total payment is not a valid number.");
-                            }
+                            });
                         } else {
-                            console.log("User data not found in the database.");
+                            console.log("CurrentParkingData not found for user:", userData.uid);
                         }
                     }).catch((error) => {
-                        console.error("Error getting user data:", error);
+                        console.error("Error getting CurrentParkingData for user:", userData.uid, error);
                     });
                 }
             }
+
+
+
+
 
 
 
@@ -774,13 +781,10 @@
                     document.getElementById('userLoginSection').style.display = 'block';
                     // Hide the login container and show the camera container
                     loginContainer.style.display = 'none';
-                    CameraContainer.style.display = 'block';
+                    document.getElementById('DashboardContainer').style.display = 'block';
                     // Display a success toast message
                     // alert("Login successful!");
                     console.log("Login successful!");
-                    // Initialize arrivalTime
-                    arrivalTime = updateCurrentTime();
-                    updateArrivalTime(user.uid);
                 })
                 .catch((error) => {
                     const errorCode = error.code;
@@ -788,7 +792,7 @@
                     // Handle errors here
                     console.error("Login error:", errorMessage);
                     // You can display an error toast message here if you want
-                    alert("Login failed. Please check your credentials and try again.");
+                    // alert("Login failed. Please check your credentials and try again.");
                 });
         }
 
@@ -808,15 +812,11 @@
                     document.getElementById('userLoginSection').style.display = 'block';
                     // Hide the registration container and show the camera container
                     registrationContainer.style.display = 'none';
-                    CameraContainer.style.display = 'block';
+                    document.getElementById('DashboardContainer').style.display = 'block';
                     // Display a success toast message
                     // alert("Registration successful!");
                     console.log("Registration successful!");
                     AddData(user);
-                    // Call the updateArrivalTime function to update arrival time after registration
-                    updateArrivalTime(user.uid);
-                    // Initialize arrivalTime
-                    arrivalTime = updateCurrentTime();
                 })
                 .catch((error) => {
                     const errorCode = error.code;
@@ -830,6 +830,30 @@
 
         // Check if user data exists in sessionStorage on page load
         document.addEventListener('DOMContentLoaded', function () {
+            // Get the current user from sessionStorage
+            const user = JSON.parse(sessionStorage.getItem('user'));
+            if (user) {
+                // Reference to the user's 'CurrentParkingData' value in the database
+                const userParkingRef = ref(db, `users/${user.uid}/CurrentParkingData`);
+
+                // Retrieve the 'paid' value from the database
+                get(userParkingRef).then((snapshot) => {
+                    if (snapshot.exists()) {
+                        document.getElementById('wantToBuySlot').style.display = 'none';
+                        // document.getElementById('DashboardContainer').style.display = 'none';
+                        // document.getElementById('CameraContainer').style.display = 'block';
+                    } else {
+                        console.log("User has already paid.");
+                        // Optionally, display a message to inform the user
+                        document.getElementById('buySlot').style.display = 'none';
+                    }
+                }).catch((error) => {
+                    console.error("Error getting paid value:", error);
+                });
+            } else {
+                console.error("No user is logged in.");
+            }
+
             const userData = sessionStorage.getItem('user');
             if (userData) {
                 // User data exists, parse it and log in the user
@@ -842,7 +866,7 @@
                 document.getElementById('userLoginSection').style.display = 'block';
                 // Hide the login container and show the camera container
                 loginContainer.style.display = 'none';
-                CameraContainer.style.display = 'block';
+                document.getElementById('DashboardContainer').style.display = 'block';
                 // Update the user's arrival time after registration
                 updateArrivalTime(user.uid);
             }
@@ -855,6 +879,8 @@
                 // Hide the user login section
                 document.getElementById('userLoginSection').style.display = 'none';
                 document.getElementById('CameraContainer').style.display = 'none';
+                document.getElementById('DashboardContainer').style.display = 'none';
+
                 // Show the login container
                 loginContainer.style.display = 'block';
                 // Display a success toast message
@@ -870,17 +896,27 @@
 
         // Inside the updateArrivalTime function after retrieving arrival time from the database
         function updateArrivalTime(userUid) {
-            const dbRef = ref(db, 'users/' + userUid + '/arrivalTime');
+            const dbRef = ref(db, `users/${userUid}/CurrentParkingData`);
             get(dbRef).then((snapshot) => {
                 if (snapshot.exists()) {
-                    const arrivalTimeVal = snapshot.val();
-                    arrivalTime = arrivalTimeVal; // Set the arrivalTime variable
-                    document.querySelector('.arrivalTimeOut').textContent = arrivalTimeVal;
+                    // Iterate over the child nodes under CurrentParkingData
+                    snapshot.forEach((dateSnapshot) => {
+                        dateSnapshot.forEach((timeSnapshot) => {
+                            // Check if the arrivalTime exists under the current time slot
+                            if ('arrivalTime' in timeSnapshot.val()) {
+                                const arrivalTimeVal = timeSnapshot.val().arrivalTime;
+                                arrivalTime = arrivalTimeVal; // Set the arrivalTime variable
+                                document.querySelector('.arrivalTimeOut').textContent = arrivalTimeVal;
+                            } else {
+                                console.log("Arrival time not found for the user.");
+                            }
+                        });
+                    });
                 } else {
-                    console.log("Arrival time not found for the user.");
+                    console.log("CurrentParkingData not found for user:", userUid);
                 }
             }).catch((error) => {
-                console.error("Error getting arrival time:", error);
+                console.error("Error getting CurrentParkingData for user:", userUid, error);
             });
         }
 
@@ -903,54 +939,146 @@
         });
 
 
+        // Check my Slot click event
+        // Event listener for "Check my Slot" button click
+        document.getElementById('buySlot').addEventListener('click', () => {
+            document.getElementById('DashboardContainer').style.display = 'none';
+            document.getElementById('CameraContainer').style.display = 'block';
+        });
+
+        // Event listener for "Buy a Slot" button click
+        document.getElementById('wantToBuySlot').addEventListener('click', () => {
+            document.getElementById('DashboardContainer').style.display = 'none';
+            document.getElementById('CameraContainer').style.display = 'block';
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const amOrPm = hours >= 12 ? 'PM' : 'AM';
+            const formattedHours = hours % 12 || 12;
+            const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+            const currentTime = `${formattedHours}:${formattedMinutes} ${amOrPm}`;
+
+            const user = JSON.parse(sessionStorage.getItem('user')); // Assuming user data is stored in sessionStorage
+
+            if (user) {
+                const userRef = ref(db, `users/${user.uid}/CurrentParkingData/${year}-${month}-${day}/${currentTime}`);
+
+                set(userRef, {
+                    arrivalTime: currentTime,
+                    totalTime: 0,
+                    totalPayment: 0,
+                    paid: 0
+                })
+                    .then(() => {
+                        console.log("Data Saved Successfully");
+                        // Call the updateArrivalTime function to update arrival time after registration
+                        updateArrivalTime(user.uid);
+                        // Initialize arrivalTime
+                        arrivalTime = updateCurrentTime();
+                    })
+                    .catch((error) => {
+                        console.error("Error saving data:", error);
+                        alert("Unsuccessful");
+                    });
+            } else {
+                console.error("No user is logged in.");
+            }
+        });
+
+
+
+
         // Get reference to the "Pay For Dispatch" button
         const payForDispatchBtn = document.getElementById('payForDispatch');
         // Get reference to the CameraContainer and thankYouPaymentContainer
         const cameraContainer = document.getElementById('CameraContainer');
+
 
         // Event listener for the "Pay For Dispatch" button click
         payForDispatchBtn.addEventListener('click', () => {
             // Get the current user from sessionStorage
             const user = JSON.parse(sessionStorage.getItem('user'));
             if (user) {
-                // Update the paid value to 1 for the current user
-                const userRef = ref(db, 'users/' + user.uid);
-                update(userRef, {
-                    paid: 1
-                }).then(() => {
-                    console.log("Paid value updated successfully for user:", user.uid);
+                // Reference to the user's CurrentParkingData node in the database
+                const userParkingDataRef = ref(db, `users/${user.uid}/CurrentParkingData`);
 
-                    // Hide the CameraContainer and show the thankYouPaymentContainer
-                    cameraContainer.style.display = 'none';
-                    thankYouPaymentContainer.style.display = 'block';
+                // Get the snapshot of CurrentParkingData
+                get(userParkingDataRef).then((snapshot) => {
+                    if (snapshot.exists()) {
+                        // Iterate over the child nodes under CurrentParkingData
+                        snapshot.forEach((dateSnapshot) => {
+                            // Iterate over the child nodes under each date
+                            dateSnapshot.forEach((timeSnapshot) => {
+                                // Reference to the 'paid' value under each time slot
+                                const userPaidRef = ref(db, `users/${user.uid}/CurrentParkingData/${dateSnapshot.key}/${timeSnapshot.key}`);
 
-                    // Add a 5-second delay before executing the logout action
-                    setTimeout(() => {
-                        // Perform logout action after 5 seconds
-                        auth.signOut().then(() => {
-                            // Sign-out successful.
-                            // Hide the user login section
-                            document.getElementById('userLoginSection').style.display = 'none';
-                            document.getElementById('CameraContainer').style.display = 'none';
-                            thankYouPaymentContainer.style.display = 'none';
-                            // Show the login container
-                            loginContainer.style.display = 'block';
-                            // Display a success toast message
-                            // alert("Logout successful!");
-                        }).catch((error) => {
-                            // An error happened.
-                            console.error("Logout error:", error.message);
-                            // You can display an error toast message here if you want
-                            alert("Logout failed. Please try again.");
+                                // Update the 'paid' value to 1
+                                update(userPaidRef, {
+                                    paid: 1
+                                }).then(() => {
+                                    console.log("Paid value updated successfully for user:", user.uid);
+
+                                    // Add a delay before moving data to HistoryParkingData
+                                    setTimeout(() => {
+                                        // Move the data to HistoryParkingData
+                                        const historyParkingDataRef = ref(db, `users/${user.uid}/HistoryParkingData/${dateSnapshot.key}/${timeSnapshot.key}`);
+                                        set(historyParkingDataRef, timeSnapshot.val()).then(() => {
+                                            console.log("Data moved to HistoryParkingData successfully.");
+
+                                            // Update the 'paid' value to 1 in HistoryParkingData
+                                            update(historyParkingDataRef, {
+                                                paid: 1
+                                            }).then(() => {
+                                                console.log("Paid value updated to 1 in HistoryParkingData.");
+                                            }).catch((error) => {
+                                                console.error("Error updating paid value in HistoryParkingData:", error);
+                                            });
+
+                                            // Remove the data from CurrentParkingData
+                                            remove(timeSnapshot.ref).then(() => {
+                                                console.log("Data removed from CurrentParkingData successfully.");
+
+                                                // Hide the CameraContainer and show the thankYouPaymentContainer
+                                                cameraContainer.style.display = 'none';
+                                                thankYouPaymentContainer.style.display = 'block';
+
+                                                // Refresh the page after 2 seconds
+                                                setTimeout(() => {
+                                                    location.reload();
+                                                }, 2000);
+                                            }).catch((error) => {
+                                                console.error("Error removing data from CurrentParkingData:", error);
+                                            });
+                                        }).catch((error) => {
+                                            console.error("Error moving data to HistoryParkingData:", error);
+                                        });
+                                    }, 5000); // 5-second delay (5000 milliseconds)
+
+                                }).catch((error) => {
+                                    console.error("Error updating paid value for user:", user.uid, error);
+                                });
+                            });
                         });
-                    }, 5000); // 5-second delay (5000 milliseconds)
+                    } else {
+                        console.log("CurrentParkingData not found for user:", user.uid);
+                    }
                 }).catch((error) => {
-                    console.error("Error updating paid value for user:", user.uid, error);
+                    console.error("Error getting CurrentParkingData for user:", user.uid, error);
                 });
             } else {
                 console.error("No user is logged in.");
             }
         });
+
+
+
+
+
+
 
 
 
@@ -1139,10 +1267,6 @@
                 vehicleType: vehicleType.value,
                 vehicleBrand: vehicleBrand.value,
                 vehicleModal: vehicleModal.value,
-                arrivalTime: currentTime,
-                totalTime: Number(0),
-                totalPayment: Number(0),
-                paid: Number(0)
             })
                 .then(() => {
                     console.log("Data Saved Successfully");
