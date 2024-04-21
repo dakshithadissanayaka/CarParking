@@ -598,6 +598,7 @@
 
         // Initialize Firebase Authentication and get a reference to the service
         const auth = getAuth(app);
+        var current_user = auth.currentUser;
 
         // Inside the loginUser function after successful login
         function loginUser(email, password) {
@@ -616,7 +617,8 @@
                     loginContainer.style.display = 'none';
                     CameraContainer.style.display = 'block';
                     // Display a success toast message
-                    alert("Login successful!");
+                    // alert("Login successful!");
+                    console.log("Login successful!");
                 })
                 .catch((error) => {
                     const errorCode = error.code;
@@ -632,6 +634,7 @@
         function registerUser(email, password) {
             createUserWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
+                    
                     // Signed up 
                     const user = userCredential.user;
                     // You can do additional tasks here after successful registration
@@ -639,14 +642,15 @@
                     console.log("User registered:", user);
                     sessionStorage.setItem('user', JSON.stringify(user));
                     // Show the user login section
-                    document.getElementById('userFullName').textContent = user.displayName;
+                    document.getElementById('userFullName').textContent = user.email; // Update to display email
                     document.getElementById('userLoginSection').style.display = 'block';
                     // Hide the registration container and show the camera container
                     registrationContainer.style.display = 'none';
                     CameraContainer.style.display = 'block';
                     // Display a success toast message
-                    alert("Registration successful!");
-                    AddData();
+                    // alert("Registration successful!");
+                    console.log("Registration successful!");
+                    AddData(user);
                 })
                 .catch((error) => {
                     const errorCode = error.code;
@@ -666,7 +670,7 @@
                 const user = JSON.parse(userData);
                 // Continue with login process
                 // For example, update UI to show user as logged in
-                console.log("User data found in sessionStorage:", user);
+                console.log("Login successful! User data found in sessionStorage:", user);
                 // Show the user login section
                 document.getElementById('userFullName').textContent = user.email; // Update to display email
                 document.getElementById('userLoginSection').style.display = 'block';
@@ -686,7 +690,7 @@
                 // Show the login container
                 loginContainer.style.display = 'block';
                 // Display a success toast message
-                alert("Logout successful!");
+                // alert("Logout successful!");
             }).catch((error) => {
                 // An error happened.
                 console.error("Logout error:", error.message);
@@ -861,7 +865,7 @@
         vehicleTypeDropdown.addEventListener('change', populateVehicleBrands);
         vehicleBrandDropdown.addEventListener('change', populateVehicleModels);
 
-        function AddData() {
+        function AddData(user) {
             if (!name.value || !email.value || !phoneNumber.value || !nic.value || !vehicleNumber.value || !vehicleType.value || !vehicleBrand.value || !vehicleModal.value || !password.value) {
                 alert("Please fill all the fields");
                 return;
@@ -887,7 +891,7 @@
             // Format the time as HH:MM:SS
             const formattedTime = `${hours}:${minutes}`;
 
-            set(ref(db, 'CarDetails/' + nic.value), {
+            set(ref(db, 'users/' + user.uid), {
                 name: name.value,
                 email: email.value,
                 phoneNumber: Number(phoneNumber.value),
@@ -900,7 +904,7 @@
                 arrivalTime: formattedTime
             })
                 .then(() => {
-                    console.log("Data Added Successfully");
+                    console.log("Data Saved Successfully");
                 })
                 .catch((error) => {
                     alert("Unsuccessful");
@@ -912,7 +916,7 @@
         function RetrieveData() {
             const dbRef = ref(db);
 
-            get(child(dbRef, 'CarDetails/' + nic.value)).then((snapshot) => {
+            get(child(dbRef, 'CarDetails/' + user.uid)).then((snapshot) => {
                 if (snapshot.exists()) {
                     name.value = snapshot.val().name;
                     email.value = snapshot.val().email;
@@ -935,7 +939,7 @@
         }
 
         function UpdateData() {
-            update(ref(db, 'CarDetails/' + nic.value), {
+            update(ref(db, 'CarDetails/' + user.uid), {
                 name: name.value,
                 email: email.value,
                 phoneNumber: Number(phoneNumber.value),
@@ -956,7 +960,7 @@
         }
 
         function DeleteData() {
-            remove(ref(db, 'CarDetails/' + nic.value))
+            remove(ref(db, 'CarDetails/' + user.uid))
                 .then(() => {
                     alert("Data Deleted Successfully");
                 })
@@ -967,9 +971,9 @@
         }
 
         // addBtn.addEventListener('click', AddData);
-        retrieveBtn.addEventListener('click', RetrieveData);
-        updateBtn.addEventListener('click', UpdateData);
-        deleteBtn.addEventListener('click', DeleteData);
+        // retrieveBtn.addEventListener('click', RetrieveData);
+        // updateBtn.addEventListener('click', UpdateData);
+        // deleteBtn.addEventListener('click', DeleteData);
     </script>
 
 </body>
