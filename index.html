@@ -365,6 +365,18 @@
         <h2 class="registration">Registration</h2>
         <div id="detailsContainer">
 
+            <div id="slotsDetails">
+                <fieldset>
+                    <legend>Available Parking Slots:</legend>
+                    <div class="slot" id="slot1">
+                        Slot 1
+                    </div>
+                    <div class="slot" id="slot2">
+                        Slot 2
+                    </div>
+                </fieldset>
+            </div>
+
             <div id="driverDetails">
                 <fieldset>
                     <legend>Driver Details:</legend>
@@ -504,7 +516,7 @@
     </div>
 
 
-    <div id="DashboardContainer" style="display: none;">
+    <!-- <div id="DashboardContainer" style="display: none;">
         <h2 class="title">Dashboard</h2>
 
         <div id="slotsDetails">
@@ -520,10 +532,7 @@
         </div>
 
         <button id="buySlot" type="button" class="btn btn-primary">Buy a Slot</button>
-
-
-
-    </div>
+    </div> -->
 
 
     <div id="CameraContainer">
@@ -910,9 +919,31 @@
                     paid: 1
                 }).then(() => {
                     console.log("Paid value updated successfully for user:", user.uid);
+
                     // Hide the CameraContainer and show the thankYouPaymentContainer
                     cameraContainer.style.display = 'none';
                     thankYouPaymentContainer.style.display = 'block';
+
+                    // Add a 5-second delay before executing the logout action
+                    setTimeout(() => {
+                        // Perform logout action after 5 seconds
+                        auth.signOut().then(() => {
+                            // Sign-out successful.
+                            // Hide the user login section
+                            document.getElementById('userLoginSection').style.display = 'none';
+                            document.getElementById('CameraContainer').style.display = 'none';
+                            thankYouPaymentContainer.style.display = 'none';
+                            // Show the login container
+                            loginContainer.style.display = 'block';
+                            // Display a success toast message
+                            // alert("Logout successful!");
+                        }).catch((error) => {
+                            // An error happened.
+                            console.error("Logout error:", error.message);
+                            // You can display an error toast message here if you want
+                            alert("Logout failed. Please try again.");
+                        });
+                    }, 5000); // 5-second delay (5000 milliseconds)
                 }).catch((error) => {
                     console.error("Error updating paid value for user:", user.uid, error);
                 });
@@ -920,6 +951,7 @@
                 console.error("No user is logged in.");
             }
         });
+
 
 
 
