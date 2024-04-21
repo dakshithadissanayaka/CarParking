@@ -16,6 +16,7 @@
         }
 
         .arrivalTime,
+        .nowlTime,
         .totalTime,
         .totalPaymentForTime {
             text-align: left;
@@ -57,6 +58,7 @@
         @media only screen and (max-width: 430px) {
 
             .arrivalTime,
+            .nowlTime,
             .totalTime,
             .totalPaymentForTime {
                 font-size: 14px;
@@ -363,18 +365,6 @@
         <h2 class="registration">Registration</h2>
         <div id="detailsContainer">
 
-            <div id="slotsDetails">
-                <fieldset>
-                    <legend>Available Parking Slots:</legend>
-                    <div class="slot" id="slot1">
-                        Slot 1
-                    </div>
-                    <div class="slot" id="slot2">
-                        Slot 2
-                    </div>
-                </fieldset>
-            </div>
-
             <div id="driverDetails">
                 <fieldset>
                     <legend>Driver Details:</legend>
@@ -514,13 +504,36 @@
     </div>
 
 
+    <div id="DashboardContainer" style="display: none;">
+        <h2 class="title">Dashboard</h2>
+
+        <div id="slotsDetails">
+            <fieldset>
+                <legend>Available Parking Slots:</legend>
+                <div class="slot" id="slot1">
+                    Slot 1
+                </div>
+                <div class="slot" id="slot2">
+                    Slot 2
+                </div>
+            </fieldset>
+        </div>
+
+        <button id="buySlot" type="button" class="btn btn-primary">Buy a Slot</button>
+
+
+
+    </div>
+
+
     <div id="CameraContainer">
         <h2 class="title">Your Car Slot Camera : <span class="live">LIVE</span></h2>
 
         <div class="paymentDetails">
-            <h2 class="arrivalTime"> Arrival Time : <span class="live"> </span></h2>
-            <h2 class="totalTime"> Total Time : <span class="live"> </span></h2>
-            <h2 class="totalPaymentForTime"> Total Payment for Time : <span class="live"> </span></h2>
+            <h2 class="arrivalTime"> Arrival Time : <span class="arrivalTimeOut"> </span></h2>
+            <h2 class="nowlTime"> Now Time : <span class="nowlTimeOut"> </span></h2>
+            <h2 class="totalTime"> Total Time : <span class="totalTimeOut"> </span></h2>
+            <h2 class="totalPaymentForTime"> Total Payment for Time : <span class="totalPaymentForTimeOut"> </span></h2>
         </div>
 
         <button id="payForDispatch" type="button" class="btn btn-primary">Pay For Dispatch</button>
@@ -529,6 +542,13 @@
             <img class="image" src="./cctv.jpg">
         </div>
 
+    </div>
+
+
+    <!-- Add the payment section -->
+    <div id="thankYouPaymentContainer" style="display: none;">
+        <h1 class="welcome" style="margin-top: 100px;">Thank you.<br> Payment was successfully!<br><br>See You Again.
+        </h1>
     </div>
 
     <div id="warningModal" class="warningModal">
@@ -540,6 +560,134 @@
 
 
     <script type="module">
+
+        let arrivalTime;
+
+        // Function to update the current time
+        function updateCurrentTime() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const amOrPm = hours >= 12 ? 'PM' : 'AM';
+            const formattedHours = hours % 12 || 12; // Convert to 12-hour format
+            const formattedMinutes = minutes < 10 ? '0' + minutes : minutes; // Add leading zero if needed
+            const currentTime = `${formattedHours}:${formattedMinutes} ${amOrPm}`;
+            return currentTime;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+
+            // Function to calculate the total time difference
+            function calculateTotalTime(arrivalTime, nowTime) {
+                console.log("Arrival time:", arrivalTime);
+                console.log("Now time:", nowTime);
+                const arrival = new Date('01/01/2022 ' + arrivalTime); // Assuming arrivalTime is in format HH:MM AM/PM
+                const now = new Date('01/01/2022 ' + nowTime); // Assuming nowTime is in format HH:MM AM/PM
+
+                const diffMs = now - arrival;
+                console.log("Diff in milliseconds:", diffMs);
+
+                // Convert milliseconds to minutes
+                const diffMinutes = Math.floor(diffMs / 60000);
+                console.log("Diff in minutes:", diffMinutes);
+
+                // Calculate hours and remaining minutes
+                const diffHours = Math.floor(diffMinutes / 60);
+                const remainingMinutes = diffMinutes % 60;
+
+                const totalTime = `${diffHours} hours ${remainingMinutes} minutes`;
+                console.log("Total time:", totalTime);
+                return totalTime;
+            }
+
+
+
+            // Function to calculate the total payment for time based on the rate
+            function calculateTotalPayment(totalTime) {
+                // Split the totalTime string to extract hours and minutes
+                const [hoursStr, minutesStr] = totalTime.split(' hours ');
+                // Convert hours and minutes to integers
+                const hours = parseInt(hoursStr);
+                const minutes = parseInt(minutesStr.split(' minutes')[0]);
+                // Calculate total minutes
+                const totalMinutes = hours * 60 + minutes;
+                // Calculate total payment based on the rate (2 LKR per minute)
+                const totalPayment = totalMinutes * 2;
+                return totalPayment;
+            }
+
+
+            // Function to update the content of the time span
+            function updateTimeSpan() {
+                const arrivalTimeSpan = document.querySelector('.arrivalTimeOut');
+                const totalTimeSpan = document.querySelector('.totalTimeOut');
+                const nowTimeSpan = document.querySelector('.nowlTimeOut');
+                const totalPaymentSpan = document.querySelector('.totalPaymentForTimeOut');
+
+                // Retrieve user data from session storage
+                const userData = JSON.parse(sessionStorage.getItem('user'));
+
+                if (arrivalTimeSpan && nowTimeSpan && totalTimeSpan && totalPaymentSpan) {
+
+                    // Retrieve the logged-in user's data from the database
+                    const dbRef = ref(db);
+                    const userRef = child(dbRef, 'users/' + userData.uid);
+
+                    get(userRef).then((snapshot) => {
+                        if (snapshot.exists()) {
+                            const user = snapshot.val();
+                            if (user.paid === 1) {
+                                // Stop the function execution if paid is 1
+                                return;
+                            }
+                            nowTimeSpan.textContent = updateCurrentTime();
+                            const totalTime = calculateTotalTime(arrivalTime, updateCurrentTime());
+                            totalTimeSpan.textContent = totalTime;
+
+                            const totalPayment = calculateTotalPayment(totalTime);
+                            // Update the payment span with the calculated value
+                            totalPaymentSpan.textContent = totalPayment + ' LKR';
+
+                            // Check if totalTime and totalPayment are valid numbers
+                            if (totalTime && totalPayment) {
+                                // Update the Firebase database with the new values
+                                const user = JSON.parse(sessionStorage.getItem('user'));
+                                const userRef = ref(db, 'users/' + user.uid);
+                                // Convert totalTime and totalPayment to strings
+                                const totalTimeStr = totalTime.toString();
+                                const totalPaymentStr = totalPayment.toString();
+                                // Update the Firebase database with the new values
+                                update(userRef, {
+                                    totalTime: totalTimeStr,
+                                    totalPayment: totalPaymentStr
+                                }).then(() => {
+                                    console.log("Data updated successfully in the Firebase database.");
+                                }).catch((error) => {
+                                    console.error("Error updating data in the Firebase database:", error);
+                                });
+                            } else {
+                                console.error("Total time or total payment is not a valid number.");
+                            }
+                        } else {
+                            console.log("User data not found in the database.");
+                        }
+                    }).catch((error) => {
+                        console.error("Error getting user data:", error);
+                    });
+                }
+            }
+
+
+
+
+            // Call updateTimeSpan initially
+            updateTimeSpan();
+
+            // Call updateTimeSpan every second to update the time
+            setInterval(updateTimeSpan, 1000);
+        });
+
 
 
 
@@ -573,6 +721,8 @@
         const CameraContainer = document.getElementById('CameraContainer');
         const loginContainer = document.getElementById('loginContainer');
         const registrationContainer = document.getElementById('RegistationContainer');
+        const thankYouPaymentContainer = document.getElementById('thankYouPaymentContainer');
+
 
 
         // Import the functions you need from the SDKs you need
@@ -619,6 +769,9 @@
                     // Display a success toast message
                     // alert("Login successful!");
                     console.log("Login successful!");
+                    // Initialize arrivalTime
+                    arrivalTime = updateCurrentTime();
+                    updateArrivalTime(user.uid);
                 })
                 .catch((error) => {
                     const errorCode = error.code;
@@ -634,7 +787,7 @@
         function registerUser(email, password) {
             createUserWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
-                    
+
                     // Signed up 
                     const user = userCredential.user;
                     // You can do additional tasks here after successful registration
@@ -651,6 +804,10 @@
                     // alert("Registration successful!");
                     console.log("Registration successful!");
                     AddData(user);
+                    // Call the updateArrivalTime function to update arrival time after registration
+                    updateArrivalTime(user.uid);
+                    // Initialize arrivalTime
+                    arrivalTime = updateCurrentTime();
                 })
                 .catch((error) => {
                     const errorCode = error.code;
@@ -677,6 +834,8 @@
                 // Hide the login container and show the camera container
                 loginContainer.style.display = 'none';
                 CameraContainer.style.display = 'block';
+                // Update the user's arrival time after registration
+                updateArrivalTime(user.uid);
             }
         });
 
@@ -700,6 +859,23 @@
         });
 
 
+        // Inside the updateArrivalTime function after retrieving arrival time from the database
+        function updateArrivalTime(userUid) {
+            const dbRef = ref(db, 'users/' + userUid + '/arrivalTime');
+            get(dbRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const arrivalTimeVal = snapshot.val();
+                    arrivalTime = arrivalTimeVal; // Set the arrivalTime variable
+                    document.querySelector('.arrivalTimeOut').textContent = arrivalTimeVal;
+                } else {
+                    console.log("Arrival time not found for the user.");
+                }
+            }).catch((error) => {
+                console.error("Error getting arrival time:", error);
+            });
+        }
+
+
 
         // Register button click event
         const registerBtn = document.getElementById('addBtn');
@@ -716,6 +892,35 @@
             const password = document.getElementById('loginPassword').value;
             loginUser(email, password);
         });
+
+
+        // Get reference to the "Pay For Dispatch" button
+        const payForDispatchBtn = document.getElementById('payForDispatch');
+        // Get reference to the CameraContainer and thankYouPaymentContainer
+        const cameraContainer = document.getElementById('CameraContainer');
+
+        // Event listener for the "Pay For Dispatch" button click
+        payForDispatchBtn.addEventListener('click', () => {
+            // Get the current user from sessionStorage
+            const user = JSON.parse(sessionStorage.getItem('user'));
+            if (user) {
+                // Update the paid value to 1 for the current user
+                const userRef = ref(db, 'users/' + user.uid);
+                update(userRef, {
+                    paid: 1
+                }).then(() => {
+                    console.log("Paid value updated successfully for user:", user.uid);
+                    // Hide the CameraContainer and show the thankYouPaymentContainer
+                    cameraContainer.style.display = 'none';
+                    thankYouPaymentContainer.style.display = 'block';
+                }).catch((error) => {
+                    console.error("Error updating paid value for user:", user.uid, error);
+                });
+            } else {
+                console.error("No user is logged in.");
+            }
+        });
+
 
 
 
@@ -861,6 +1066,9 @@
             }
         }
 
+
+
+
         // Event listeners for dropdown changes
         vehicleTypeDropdown.addEventListener('change', populateVehicleBrands);
         vehicleBrandDropdown.addEventListener('change', populateVehicleModels);
@@ -881,15 +1089,13 @@
                 }
             })
 
-            // Create a new Date object
             const now = new Date();
-
-            // Get the current hour, minute, and second
             const hours = now.getHours();
             const minutes = now.getMinutes();
-
-            // Format the time as HH:MM:SS
-            const formattedTime = `${hours}:${minutes}`;
+            const amOrPm = hours >= 12 ? 'PM' : 'AM';
+            const formattedHours = hours % 12 || 12; // Convert to 12-hour format
+            const formattedMinutes = minutes < 10 ? '0' + minutes : minutes; // Add leading zero if needed
+            const currentTime = `${formattedHours}:${formattedMinutes} ${amOrPm}`;
 
             set(ref(db, 'users/' + user.uid), {
                 name: name.value,
@@ -901,7 +1107,10 @@
                 vehicleType: vehicleType.value,
                 vehicleBrand: vehicleBrand.value,
                 vehicleModal: vehicleModal.value,
-                arrivalTime: formattedTime
+                arrivalTime: currentTime,
+                totalTime: Number(0),
+                totalPayment: Number(0),
+                paid: Number(0)
             })
                 .then(() => {
                     console.log("Data Saved Successfully");
@@ -916,7 +1125,7 @@
         function RetrieveData() {
             const dbRef = ref(db);
 
-            get(child(dbRef, 'CarDetails/' + user.uid)).then((snapshot) => {
+            get(child(dbRef, 'users/' + user.uid)).then((snapshot) => {
                 if (snapshot.exists()) {
                     name.value = snapshot.val().name;
                     email.value = snapshot.val().email;
@@ -929,7 +1138,7 @@
                     vehicleModal.value = snapshot.val().vehicleModal;
                 }
                 else {
-                    alert("Car Details does not exist");
+                    alert("User Details does not exist");
                 }
             })
                 .catch(() => {
@@ -939,7 +1148,7 @@
         }
 
         function UpdateData() {
-            update(ref(db, 'CarDetails/' + user.uid), {
+            update(ref(db, 'users/' + user.uid), {
                 name: name.value,
                 email: email.value,
                 phoneNumber: Number(phoneNumber.value),
@@ -960,7 +1169,7 @@
         }
 
         function DeleteData() {
-            remove(ref(db, 'CarDetails/' + user.uid))
+            remove(ref(db, 'users/' + user.uid))
                 .then(() => {
                     alert("Data Deleted Successfully");
                 })
@@ -974,6 +1183,10 @@
         // retrieveBtn.addEventListener('click', RetrieveData);
         // updateBtn.addEventListener('click', UpdateData);
         // deleteBtn.addEventListener('click', DeleteData);
+
+
+
+
     </script>
 
 </body>
