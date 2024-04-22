@@ -852,9 +852,36 @@
                     // Display a success toast message
                     // alert("Login successful!");
                     console.log("Login successful!");
+                    const users = JSON.parse(sessionStorage.getItem('user'));
+                    if (users) {
+
+                        // Reference to the user's 'CurrentParkingData' value in the database
+                        const userParkingRef = ref(db, `users/${users.uid}/CurrentParkingData`);
+
+                        // Retrieve the 'paid' value from the database
+                        get(userParkingRef).then((snapshot) => {
+                            if (snapshot.exists()) {
+                                document.getElementById('wantToBuySlot').style.display = 'none';
+                                // document.getElementById('DashboardContainer').style.display = 'none';
+                                // document.getElementById('CameraContainer').style.display = 'block';
+                            } else {
+                                console.log("User has already paid. - checked in login");
+                                // Optionally, display a message to inform the user
+                                document.getElementById('buySlot').style.display = 'none';
+                                document.getElementById('wantToBuySlot').style.display = 'inline-block';
+                            }
+                        }).catch((error) => {
+                            console.error("Error getting paid value:", error);
+                        });
+                    }
                     // Call checkCurrentParkingDataExists initially
                     checkSlotsAvailable();
+
+                    // Update the user's arrival time after registration
+                    updateArrivalTime(users.uid);
                     location.reload();
+
+
 
 
                 })
@@ -888,10 +915,36 @@
                     // Display a success toast message
                     // alert("Registration successful!");
                     console.log("Registration successful!");
+                    const users = JSON.parse(sessionStorage.getItem('user'));
+                    if (users) {
+
+                        // Reference to the user's 'CurrentParkingData' value in the database
+                        const userParkingRef = ref(db, `users/${users.uid}/CurrentParkingData`);
+
+                        // Retrieve the 'paid' value from the database
+                        get(userParkingRef).then((snapshot) => {
+                            if (snapshot.exists()) {
+                                document.getElementById('wantToBuySlot').style.display = 'none';
+                                // document.getElementById('DashboardContainer').style.display = 'none';
+                                // document.getElementById('CameraContainer').style.display = 'block';
+                            } else {
+                                console.log("User has already paid. - checked in signup");
+                                // Optionally, display a message to inform the user
+                                document.getElementById('buySlot').style.display = 'none';
+                                document.getElementById('wantToBuySlot').style.display = 'inline-block';
+                            }
+                        }).catch((error) => {
+                            console.error("Error getting paid value:", error);
+                        });
+                    }
                     AddData(user);
                     // Call checkCurrentParkingDataExists initially
                     checkSlotsAvailable();
+                    // Update the user's arrival time after registration
+                    updateArrivalTime(users.uid);
                     location.reload();
+
+
 
                 })
                 .catch((error) => {
@@ -910,6 +963,27 @@
             checkSlotsAvailable();
             // Get the current user from sessionStorage
             const user = JSON.parse(sessionStorage.getItem('user'));
+            if (user) {
+
+                // Reference to the user's 'CurrentParkingData' value in the database
+                const userParkingRef = ref(db, `users/${user.uid}/CurrentParkingData`);
+
+                // Retrieve the 'paid' value from the database
+                get(userParkingRef).then((snapshot) => {
+                    if (snapshot.exists()) {
+                        document.getElementById('wantToBuySlot').style.display = 'none';
+                        // document.getElementById('DashboardContainer').style.display = 'none';
+                        // document.getElementById('CameraContainer').style.display = 'block';
+                    } else {
+                        console.log("User has already paid.");
+                        // Optionally, display a message to inform the user
+                        document.getElementById('wantToBuySlot').style.display = 'inline-block';
+                    }
+                }).catch((error) => {
+                    console.error("Error getting paid value:", error);
+                });
+            }
+            // Get the current user from sessionStorage
             if (user) {
 
                 // Reference to the user's 'CurrentParkingData' value in the database
