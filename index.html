@@ -854,6 +854,8 @@
                     console.log("Login successful!");
                     // Call checkCurrentParkingDataExists initially
                     checkSlotsAvailable();
+                    location.reload();
+
 
                 })
                 .catch((error) => {
@@ -889,6 +891,8 @@
                     AddData(user);
                     // Call checkCurrentParkingDataExists initially
                     checkSlotsAvailable();
+                    location.reload();
+
                 })
                 .catch((error) => {
                     const errorCode = error.code;
