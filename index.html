@@ -571,6 +571,31 @@
 
     <script type="module">
 
+        // // Get references to the slots
+        // const slot1 = document.getElementById('slot1');
+        // const slot2 = document.getElementById('slot2');
+
+        // // Function to update slot colors based on database values
+        // function updateSlotColors() {
+        //     const slotsRef = ref(db, 'SlotsDetails');
+        //     get(slotsRef).then((snapshot) => {
+        //         if (snapshot.exists()) {
+        //             const slots = snapshot.val();
+
+        //             if (slots.slot1 === 1 && slots.slot2 === 1) {
+        //                 warningModal.style.display = "block";
+        //             }
+
+        //         } else {
+        //             console.log("Slots data not found");
+        //         }
+        //     }).catch((error) => {
+        //         console.error("Error getting slots data: ", error);
+        //     });
+        // }
+
+        // updateSlotColors()
+
         let arrivalTime;
 
         // Function to update the current time
@@ -585,10 +610,52 @@
             return currentTime;
         }
 
+        document.addEventListener('DOMContentLoaded', function () {
+            // Retrieve user data from session storage
+            const userData = JSON.parse(sessionStorage.getItem('user'));
+
+            // Update paid value to 1 if snapshot of CurrentParkingData does not exist
+            function checkCurrentParkingDataExists() {
+                // Reference to the user's CurrentParkingData node in the database
+                const userParkingDataRef = ref(db, `users/${userData.uid}/CurrentParkingData`);
+
+                // Get the snapshot of CurrentParkingData
+                get(userParkingDataRef).then((snapshot) => {
+                    if (!snapshot.exists()) {
+                        // // Reference to the root 'paid' node in the database
+                        // const paidRef = ref(db, `paid`);
+
+                        // // Update paid value to 1
+                        // set(paidRef, 1).then(() => {
+                        //     console.log("Paid value updated to 1 successfully.");
+                        // }).catch((error) => {
+                        //     console.error("Error updating paid value to 1:", error);
+                        // });
+                    } else {
+                        // Reference to the root 'paid' node in the database
+                        // const paidRef = ref(db, `paid`);
+
+                        // // Update paid value to 1
+                        // set(paidRef, 0).then(() => {
+                        //     console.log("Paid value updated to 0 successfully.");
+                        // }).catch((error) => {
+                        //     console.error("Error updating paid value to 0:", error);
+                        // });
+                    }
+                }).catch((error) => {
+                    console.error("Error getting CurrentParkingData for user:", userData.uid, error);
+                });
+            }
+
+            // Call checkCurrentParkingDataExists initially
+            checkCurrentParkingDataExists();
+
+            // Call checkCurrentParkingDataExists every second to update the time
+            setInterval(checkCurrentParkingDataExists, 1000);
+        });
 
 
         document.addEventListener('DOMContentLoaded', function () {
-
 
             // Function to calculate the total time difference
             function calculateTotalTime(arrivalTime, nowTime) {
@@ -785,6 +852,9 @@
                     // Display a success toast message
                     // alert("Login successful!");
                     console.log("Login successful!");
+                    // Call checkCurrentParkingDataExists initially
+                    checkSlotsAvailable();
+
                 })
                 .catch((error) => {
                     const errorCode = error.code;
@@ -817,6 +887,8 @@
                     // alert("Registration successful!");
                     console.log("Registration successful!");
                     AddData(user);
+                    // Call checkCurrentParkingDataExists initially
+                    checkSlotsAvailable();
                 })
                 .catch((error) => {
                     const errorCode = error.code;
@@ -830,9 +902,12 @@
 
         // Check if user data exists in sessionStorage on page load
         document.addEventListener('DOMContentLoaded', function () {
+            // Call checkCurrentParkingDataExists initially
+            checkSlotsAvailable();
             // Get the current user from sessionStorage
             const user = JSON.parse(sessionStorage.getItem('user'));
             if (user) {
+
                 // Reference to the user's 'CurrentParkingData' value in the database
                 const userParkingRef = ref(db, `users/${user.uid}/CurrentParkingData`);
 
@@ -997,12 +1072,61 @@
         // Get reference to the CameraContainer and thankYouPaymentContainer
         const cameraContainer = document.getElementById('CameraContainer');
 
+        // Get reference to the "Buy a Slot" button
+        const wantToBuySlotBtn = document.getElementById('wantToBuySlot');
+
+        // Event listener for the "Pay For Dispatch" button click
+        wantToBuySlotBtn.addEventListener('click', () => {
+            const slotsRef = ref(db, 'SlotsDetails');
+            get(slotsRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const slots = snapshot.val();
+                    if (slots.slot1 === 0 || slots.slot2 === 0) {
+                        // Set registration_status to 1
+                        set(ref(db, 'registration_status/'), 1).then(() => {
+                            console.log("registration_status set to 1.");
+
+                            // Wait for 10 seconds
+                            setTimeout(() => {
+                                // Set registration_status back to 0
+                                set(ref(db, 'registration_status/'), 0).then(() => {
+                                    console.log("registration_status set back to 0.");
+                                }).catch((error) => {
+                                    console.error("Error setting registration_status back to 0:", error);
+                                });
+                            }, 10000); // 10 seconds
+                        }).catch((error) => {
+                            console.error("Error setting registration_status to 1:", error);
+                        });
+                    }
+                }
+            });
+        });
+
 
         // Event listener for the "Pay For Dispatch" button click
         payForDispatchBtn.addEventListener('click', () => {
             // Get the current user from sessionStorage
             const user = JSON.parse(sessionStorage.getItem('user'));
             if (user) {
+                // Set paid to 1
+                set(ref(db, 'paid/'), 1).then(() => {
+                    console.log("paid set to 1.");
+
+                    // Wait for 10 seconds
+                    setTimeout(() => {
+                        // Set paid back to 0
+                        set(ref(db, 'paid/'), 0).then(() => {
+                            console.log("paid set back to 0.");
+                        }).catch((error) => {
+                            console.error("Error setting paid back to 0:", error);
+                        });
+                    }, 5000); // 10 seconds
+                }).catch((error) => {
+                    console.error("Error setting paid to 1:", error);
+                });
+
+
                 // Reference to the user's CurrentParkingData node in the database
                 const userParkingDataRef = ref(db, `users/${user.uid}/CurrentParkingData`);
 
@@ -1048,7 +1172,25 @@
 
                                                 // Refresh the page after 2 seconds
                                                 setTimeout(() => {
-                                                    location.reload();
+                                                    auth.signOut().then(() => {
+                                                        // Sign-out successful.
+                                                        // Hide the user login section
+                                                        document.getElementById('userLoginSection').style.display = 'none';
+                                                        document.getElementById('CameraContainer').style.display = 'none';
+                                                        document.getElementById('DashboardContainer').style.display = 'none';
+                                                        document.getElementById('thankYouPaymentContainer').style.display = 'none';
+
+                                                        // Show the login container
+                                                        loginContainer.style.display = 'block';
+                                                        // Display a success toast message
+                                                        // alert("Logout successful!");
+                                                    }).catch((error) => {
+                                                        // An error happened.
+                                                        console.error("Logout error:", error.message);
+                                                        // You can display an error toast message here if you want
+                                                        alert("Logout failed. Please try again.");
+                                                    });
+                                                    // location.reload();
                                                 }, 2000);
                                             }).catch((error) => {
                                                 console.error("Error removing data from CurrentParkingData:", error);
@@ -1104,45 +1246,59 @@
         let updateBtn = document.getElementById('updateBtn');
         let deleteBtn = document.getElementById('deleteBtn');
 
-        // Get references to the slots
-        const slot1 = document.getElementById('slot1');
-        const slot2 = document.getElementById('slot2');
+        // Declare the slots variable
+        let slots;
 
-        // Function to update slot colors based on database values
-        function updateSlotColors() {
-            const slotsRef = ref(db, 'SlotsDetails');
-            get(slotsRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    const slots = snapshot.val();
-                    if (slots.slot1 === 1 && slots.slot2 === 1) {
-                        warningModal.style.display = "block";
-                    }
-                    // Update Slot 1 color
-                    if (slots.slot1 === 1) {
-                        slot1.classList.remove('available');
-                        slot1.classList.add('not_available');
-                    } else {
-                        slot1.classList.remove('not_available');
-                        slot1.classList.add('available');
-                    }
-                    // Update Slot 2 color
-                    if (slots.slot2 === 1) {
-                        slot2.classList.remove('available');
-                        slot2.classList.add('not_available');
-                    } else {
-                        slot2.classList.remove('not_available');
-                        slot2.classList.add('available');
-                    }
-                } else {
-                    console.log("Slots data not found");
-                }
-            }).catch((error) => {
-                console.error("Error getting slots data: ", error);
-            });
-        }
 
-        // Call the function to initially update slot colors
-        updateSlotColors();
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // Get references to the slots
+            const slot1 = document.getElementById('slot1');
+            const slot2 = document.getElementById('slot2');
+
+            // Function to update slot colors based on database values
+            function updateSlotColors() {
+                const slotsRef = ref(db, 'SlotsDetails');
+                get(slotsRef).then((snapshot) => {
+                    if (snapshot.exists()) {
+                        slots = snapshot.val();
+
+
+                        // Update Slot 1 color
+                        if (slots.slot1 === 1) {
+                            slot1.classList.remove('available');
+                            slot1.classList.add('not_available');
+                        } else {
+                            slot1.classList.remove('not_available');
+                            slot1.classList.add('available');
+                        }
+                        // Update Slot 2 color
+                        if (slots.slot2 === 1) {
+                            slot2.classList.remove('available');
+                            slot2.classList.add('not_available');
+                        } else {
+                            slot2.classList.remove('not_available');
+                            slot2.classList.add('available');
+                        }
+                    } else {
+                        console.log("Slots data not found");
+                    }
+                }).catch((error) => {
+                    console.error("Error getting slots data: ", error);
+                });
+            }
+
+            // Call checkCurrentParkingDataExists initially
+            checkSlotsAvailable();
+
+
+            // Call checkCurrentParkingDataExists initially
+            updateSlotColors();
+
+            // Call checkCurrentParkingDataExists every second to update the time
+            setInterval(updateSlotColors, 1000);
+
+        });
 
         // Get the modal
         const warningModal = document.getElementById('warningModal');
@@ -1227,6 +1383,58 @@
         }
 
 
+        function checkSlotsAvailable() {
+            // Get the current user from sessionStorage
+            const userCheck = JSON.parse(sessionStorage.getItem('user'));
+            if (userCheck) {
+                const slotsRef = ref(db, 'SlotsDetails');
+                get(slotsRef).then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const slots = snapshot.val();
+
+                        if (slots.slot1 === 1 && slots.slot2 === 1) {
+                            document.getElementById('wantToBuySlot').style.display = 'none';
+                        } else {
+                            // Get the current user from sessionStorage
+                            const user = JSON.parse(sessionStorage.getItem('user'));
+                            if (user) {
+
+                                // Reference to the user's 'CurrentParkingData' value in the database
+                                const userParkingRef = ref(db, `users/${user.uid}/CurrentParkingData`);
+
+                                // Retrieve the 'paid' value from the database
+                                get(userParkingRef).then((snapshot) => {
+                                    if (snapshot.exists()) {
+                                        document.getElementById('wantToBuySlot').style.display = 'none';
+                                        // document.getElementById('DashboardContainer').style.display = 'none';
+                                        // document.getElementById('CameraContainer').style.display = 'block';
+                                    } else {
+                                        console.log("User has already paid.");
+                                        // Optionally, display a message to inform the user
+                                        document.getElementById('wantToBuySlot').style.display = 'inline-block';
+                                    }
+                                }).catch((error) => {
+                                    console.error("Error getting paid value:", error);
+                                });
+                            } else {
+                                console.error("No user is logged in.");
+                            }
+                        }
+
+                    } else {
+                        console.log("Slots data not found");
+                    }
+                }).catch((error) => {
+                    console.error("Error getting slots data: ", error);
+                });
+
+            }
+        }
+
+
+
+
+
 
 
         // Event listeners for dropdown changes
@@ -1238,16 +1446,6 @@
                 alert("Please fill all the fields");
                 return;
             }
-
-            const slotsRef = ref(db, 'SlotsDetails');
-            get(slotsRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    const slots = snapshot.val();
-                    if (slots.slot1 === 0 || slots.slot2 === 0) {
-                        set(ref(db, 'registration_status/'), 1)
-                    }
-                }
-            })
 
             const now = new Date();
             const hours = now.getHours();
